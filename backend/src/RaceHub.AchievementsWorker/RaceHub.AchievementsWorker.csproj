@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-RaceHub.AchievementsWorker-4c7a1b2e-9f3d-4a51-8e6c-2d8b7f0a3c94</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.6" />
+    <PackageReference Include="RabbitMQ.Client" Version="7.2.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\RaceHub.Contracts\RaceHub.Contracts.csproj" />
+    <ProjectReference Include="..\RaceHub.Infrastructure\RaceHub.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

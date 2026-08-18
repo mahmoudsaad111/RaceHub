@@ -1,0 +1,85 @@
+<div class="panel-head"><h2>Friends</h2></div>
+<div class="panel-sub">Manage your racing friends and requests</div>
+
+@if (errorMessage()) {
+  <div class="banner banner-error">{{ errorMessage() }}</div>
+}
+
+<div class="friends-layout">
+  <div class="card add-friend-card">
+    <h3>ADD A FRIEND</h3>
+    <div class="add-friend-row">
+      <input
+        type="email"
+        placeholder="Friend's email address"
+        [(ngModel)]="addEmail"
+        (keydown.enter)="sendRequest()"
+      />
+      <button class="btn btn-blue btn-sm" [disabled]="sending" (click)="sendRequest()">
+        {{ sending ? 'Sending…' : 'Send Request' }}
+      </button>
+    </div>
+    @if (sendMessage) {
+      <div class="hint hint-success">{{ sendMessage }}</div>
+    }
+    @if (sendError) {
+      <div class="hint hint-error">{{ sendError }}</div>
+    }
+  </div>
+
+  <div class="card requests-card">
+    <h3>PENDING REQUESTS @if (pendingRequests().length) { ({{ pendingRequests().length }}) }</h3>
+
+    @if (loading()) {
+      <div class="empty-state">Loading…</div>
+    } @else if (pendingRequests().length === 0) {
+      <div class="empty-state">No pending requests.</div>
+    } @else {
+      @for (request of pendingRequests(); track request.friendshipId) {
+        <div class="request-row">
+          <div class="avatar">🙂</div>
+          <div class="request-info">
+            <div class="r-name">{{ request.requesterDisplayName }}</div>
+            <div class="r-sub">wants to be friends</div>
+          </div>
+          <div class="request-actions">
+            <button
+              class="btn btn-green btn-sm"
+              [disabled]="respondingId === request.friendshipId"
+              (click)="respond(request, true)"
+            >
+              Accept
+            </button>
+            <button
+              class="btn btn-outline btn-sm"
+              [disabled]="respondingId === request.friendshipId"
+              (click)="respond(request, false)"
+            >
+              Decline
+            </button>
+          </div>
+        </div>
+      }
+    }
+  </div>
+
+  <div class="card friends-list-card">
+    <h3>YOUR FRIENDS @if (friends().length) { ({{ friends().length }}) }</h3>
+
+    @if (!loading() && friends().length === 0) {
+      <div class="empty-state">No friends yet — send a request above to get started.</div>
+    }
+
+    @for (friend of friends(); track friend.userId) {
+      <div class="friend-row">
+        <div class="avatar">🙂</div>
+        <div>
+          <div class="f-name">{{ friend.displayName }}</div>
+          <div class="f-status" [class.online]="friend.online">
+            {{ friend.online ? 'Online' : 'Offline' }}
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

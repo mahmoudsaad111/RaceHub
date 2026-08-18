@@ -1,0 +1,40 @@
+# ========================
+# ASP.NET Core
+# ========================
+*.user
+*.suo
+.vs/
+bin/
+obj/
+out/
+publish/
+*.log
+appsettings.Development.json
+appsettings.Local.json
+secrets.json
+*.pfx
+*.p12
+packages/
+artifacts/
+.idea/
+.vscode/
+
+# ========================
+# Angular / Node
+# ========================
+node_modules/
+dist/
+.angular/
+.sass-cache/
+*.js.map
+/coverage
+
+# ========================
+# OS & General
+# ========================
+.DS_Store
+Thumbs.db
+*.tmp
+*.bak
+.vercel
+.env*

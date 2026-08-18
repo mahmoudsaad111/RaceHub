@@ -1,0 +1,39 @@
+<div class="panel-head"><h2>Settings</h2></div>
+<div class="panel-sub">Manage your account and preferences</div>
+
+<div class="settings-layout">
+  <div class="card settings-card">
+    <h3>ACCOUNT</h3>
+    <div class="field-row">
+      <div class="f-lbl">Display name</div>
+      <div class="f-val">{{ currentUser()?.displayName }}</div>
+    </div>
+    <div class="field-row">
+      <div class="f-lbl">Email</div>
+      <div class="f-val">{{ currentUser()?.email }}</div>
+    </div>
+    <p class="note">Editing your profile details isn't available yet — check back soon.</p>
+  </div>
+
+  <div class="card settings-card">
+    <h3>NOTIFICATIONS</h3>
+    <label class="toggle-row">
+      <span>Sound effects</span>
+      <input type="checkbox" [(ngModel)]="soundEnabled" />
+    </label>
+    <label class="toggle-row">
+      <span>Race invites &amp; updates</span>
+      <input type="checkbox" [(ngModel)]="raceNotifications" />
+    </label>
+    <label class="toggle-row">
+      <span>Friend requests</span>
+      <input type="checkbox" [(ngModel)]="friendNotifications" />
+    </label>
+    <p class="note">These preferences are local to this device for now and aren't saved to your account yet.</p>
+  </div>
+
+  <div class="card settings-card">
+    <h3>SESSION</h3>
+    <button class="btn btn-outline" (click)="logout()">Log Out</button>
+  </div>
+</div>

@@ -1,0 +1,17 @@
+.results-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px; }
+.results-head .trophy { font-size: 34px; }
+.results-head h2 { font-size: 22px; }
+.results-head p { color: var(--text-dim); font-size: 13px; }
+.results-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+.results-table th { text-align: left; font-size: 11px; color: var(--text-dimmer); letter-spacing: .5px; padding: 0 12px 10px; font-weight: 700; }
+.results-table td { padding: 12px; font-size: 13.5px; border-top: 1px solid var(--border); }
+.results-table tr:first-child td { border-top: none; }
+.pos-medal { width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; }
+.medal-1 { background: #f6c453; color: #3a2900; }
+.medal-2 { background: #c7ccd6; color: #2a2d33; }
+.medal-3 { background: #d99a5b; color: #341f05; }
+.medal-none { background: var(--panel-2); color: var(--text-dimmer); }
+.player-cell { display: flex; align-items: center; gap: 10px; }
+.player-cell .avatar { width: 26px; height: 26px; font-size: 10px; }
+.reward { color: var(--yellow); font-weight: 700; }
+.results-actions { display: flex; gap: 12px; }

@@ -1,0 +1,42 @@
+<div class="race-frame">
+  <div class="race-hud">
+    <div class="hud-box">
+      <div class="lbl">LAP</div><div class="big">{{ currentLap }} / {{ totalLaps }}</div>
+      <div class="lbl" style="margin-top:6px;">POS</div><div class="big">{{ position }} / {{ totalPlayers }}</div>
+    </div>
+    <div class="hud-box hud-timer">
+      <div class="lbl">⏱ TIME</div><div class="big">{{ elapsed }}</div>
+      <div class="lbl" style="margin-top:6px;">Best Lap: {{ bestLap }}</div>
+    </div>
+  </div>
+
+  <div class="nitro-bar-wrap">
+    <div class="lbl">🔥 NITRO</div>
+    <div class="nitro-bar"><i [style.width.%]="nitroPercent"></i></div>
+  </div>
+
+  @if (countdown !== null) {
+    <div class="countdown-overlay">
+      <div class="countdown-number">{{ countdown }}</div>
+    </div>
+  }
+
+  @if (!raceStarted) {
+    <div class="countdown-overlay">
+      <div class="countdown-number" style="font-size: 28px;">Waiting for race to start…</div>
+    </div>
+  }
+
+  <div class="track-canvas-wrap">
+    <canvas #raceCanvas class="race-canvas"></canvas>
+    <div class="track-name-badge">{{ trackName }}</div>
+  </div>
+
+  <div class="controls-hint">
+    <b>W A S D</b> / <b>Arrow Keys</b> to drive, hold <b>Shift</b> to boost with nitro.
+  </div>
+
+  <div class="race-nav">
+    <button class="circle-btn" (click)="back()">← Leave</button>
+  </div>
+</div>

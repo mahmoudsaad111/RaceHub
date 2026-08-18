@@ -1,0 +1,67 @@
+graph TB
+    subgraph Host["Host Machine"]
+        direction TB
+        Browser[Browser<br/>:4200]
+        SSMS[SSMS / Azure Data Studio<br/>:1433]
+        Mgmt[RabbitMQ Management<br/>:15672]
+        API_Swagger[API Swagger<br/>:5109]
+    end
+
+    subgraph DockerNetwork["Docker Network<br/>racehub-network"]
+        direction TB
+
+        subgraph DataServices["Data Services"]
+            SQL[(SQL Server 2022<br/>racehub-sqlserver<br/>:1433)]
+            RabbitMQ[(RabbitMQ 3<br/>racehub-rabbitmq<br/>:5672)]
+        end
+
+        subgraph AppServices["Application Services"]
+            API[RaceHub.API<br/>racehub-api<br/>:8080]
+            Client[racehub-client<br/>:80]
+        end
+
+        subgraph WorkerServices["Worker Services"]
+            Ranking[racehub-rankingworker]
+            Reward[racehub-rewardworker]
+            Statistics[racehub-statisticsworker]
+            Achievements[racehub-achievementsworker]
+        end
+    end
+
+    Browser -->|"http://localhost:4200"| Client
+    Browser -->|"http://localhost:5109/swagger"| API_Swagger
+    Browser -->|"http://localhost:15672"| Mgmt
+    SSMS -->|"localhost,1433"| SQL
+
+    Client -->|"depends_on"| API
+    API -->|"depends_on"| SQL
+    API -->|"depends_on"| RabbitMQ
+    Ranking -->|"depends_on"| SQL
+    Ranking -->|"depends_on"| RabbitMQ
+    Reward -->|"depends_on"| SQL
+    Reward -->|"depends_on"| RabbitMQ
+    Statistics -->|"depends_on"| SQL
+    Statistics -->|"depends_on"| RabbitMQ
+    Achievements -->|"depends_on"| SQL
+    Achievements -->|"depends_on"| RabbitMQ
+
+    API -->|"ConnectionStrings"| SQL
+    API -->|"RabbitMQ.Client"| RabbitMQ
+    Ranking -->|"ConnectionStrings"| SQL
+    Ranking -->|"RabbitMQ.Client"| RabbitMQ
+    Reward -->|"ConnectionStrings"| SQL
+    Reward -->|"RabbitMQ.Client"| RabbitMQ
+    Statistics -->|"ConnectionStrings"| SQL
+    Statistics -->|"RabbitMQ.Client"| RabbitMQ
+    Achievements -->|"ConnectionStrings"| SQL
+    Achievements -->|"RabbitMQ.Client"| RabbitMQ
+
+    classDef host fill:#ecf0f1,stroke:#333,stroke-width:2px
+    classDef data fill:#CC2927,color:#fff,stroke:#333,stroke-width:1px
+    classDef app fill:#512BD4,color:#fff,stroke:#333,stroke-width:1px
+    classDef worker fill:#FF6600,color:#fff,stroke:#333,stroke-width:1px
+
+    class Browser,SSMS,Mgmt,API_Swagger host
+    class SQL,RabbitMQ data
+    class API,Client app
+    class Ranking,Reward,Statistics,Achievements worker

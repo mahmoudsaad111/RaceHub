@@ -1,0 +1,85 @@
+graph LR
+    subgraph Auth["Authentication Domain"]
+        User[User]
+        RefreshToken[RefreshToken]
+    end
+
+    subgraph Racing["Racing Domain"]
+        Race[Race]
+        RacePlayer[RacePlayer]
+        RaceResult[RaceResult]
+        Lap[Lap]
+        Track[Track]
+        TrackCheckpoint[TrackCheckpoint]
+    end
+
+    subgraph Economy["Economy Domain"]
+        Car[Car]
+        UserCar[UserCar]
+    end
+
+    subgraph Social["Social Domain"]
+        Friendship[Friendship]
+        ChatMessage[ChatMessage]
+    end
+
+    subgraph Progression["Progression Domain"]
+        PlayerStatistics[PlayerStatistics]
+        RaceHistoryEntry[RaceHistoryEntry]
+        Achievement[Achievement]
+        UserAchievement[UserAchievement]
+        Notification[Notification]
+    end
+
+    subgraph Messaging["Messaging Domain"]
+        OutboxMessage[OutboxMessage]
+        ProcessedMessage[ProcessedMessage]
+    end
+
+    User --> RefreshToken
+    User --> UserCar
+    User --> RacePlayer
+    User --> Friendship
+    User --> Notification
+    User --> UserAchievement
+    User --> PlayerStatistics
+    User --> RaceHistoryEntry
+    User --> ChatMessage
+    User --> OutboxMessage
+    User --> ProcessedMessage
+
+    Car --> UserCar
+    Car --> RacePlayer
+
+    Track --> TrackCheckpoint
+    Track --> Race
+
+    Race --> RacePlayer
+    Race --> RaceResult
+    Race --> Lap
+    Race --> RaceHistoryEntry
+    Race --> ChatMessage
+
+    RacePlayer --> RaceResult
+    RacePlayer --> Lap
+
+    RaceResult --> RaceHistoryEntry
+
+    Achievement --> UserAchievement
+    Achievement --> Notification
+
+    ProcessedMessage --> OutboxMessage
+
+    classDef auth fill:#e74c3c,color:#fff,stroke:#333,stroke-width:1px
+    classDef racing fill:#3498db,color:#fff,stroke:#333,stroke-width:1px
+    classDef economy fill:#2ecc71,color:#fff,stroke:#333,stroke-width:1px
+    classDef social fill:#f39c12,color:#fff,stroke:#333,stroke-width:1px
+    classDef progression fill:#9b59b6,color:#fff,stroke:#333,stroke-width:1px
+    classDef messaging fill:#00BCD4,color:#fff,stroke:#333,stroke-width:1px
+
+    class User,RefreshToken auth
+    class Race,RacePlayer,RaceResult,Lap,Track,TrackCheckpoint racing
+    class Car,UserCar economy
+    class Friendship,ChatMessage social
+    class PlayerStatistics,RaceHistoryEntry,Achievement,UserAchievement,Notification progression
+    class OutboxMessage,ProcessedMessage messaging

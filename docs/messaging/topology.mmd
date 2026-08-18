@@ -1,0 +1,87 @@
+graph LR
+    subgraph Exchange["race.events Topic Exchange"]
+        direction TB
+    end
+
+    subgraph Queues["Queues"]
+        RQ[ranking-queue]
+        RWQ[reward-queue]
+        SQ[statistics-queue]
+        AQ[achievements-queue]
+        RNQ[reward-notify-queue]
+        ANQ[achievement-notify-queue]
+    end
+
+    Exchange -->|"race.finished"| RQ
+    Exchange -->|"race.finished"| RWQ
+    Exchange -->|"race.finished"| SQ
+    Exchange -->|"race.finished"| AQ
+    Exchange -->|"reward.credited"| RNQ
+    Exchange -->|"achievement.unlocked"| ANQ
+
+    subgraph RetryQueues["Retry Queues"]
+        RRQ[ranking-queue.retry]
+        RRWQ[reward-queue.retry]
+        RSQ[statistics-queue.retry]
+        RAQ[achievements-queue.retry]
+        RRNQ[reward-notify-queue.retry]
+        RANQ[achievement-notify-queue.retry]
+    end
+
+    subgraph DLQs["Dead Letter Queues"]
+        RDLQ[ranking-queue.dlq]
+        RDLWQ[reward-queue.dlq]
+        RDLQ2[statistics-queue.dlq]
+        RDLQ3[achievements-queue.dlq]
+        RDLQ4[reward-notify-queue.dlq]
+        RDLQ5[achievement-notify-queue.dlq]
+    end
+
+    subgraph Consumers["Consumers"]
+        RankingWorker[RankingWorker]
+        RewardWorker[RewardWorker]
+        StatisticsWorker[StatisticsWorker]
+        AchievementsWorker[AchievementsWorker]
+        RewardRelay[RewardNotificationRelayService]
+        AchievementRelay[AchievementNotificationRelayService]
+    end
+
+    RQ --> RankingWorker
+    RWQ --> RewardWorker
+    SQ --> StatisticsWorker
+    AQ --> AchievementsWorker
+    RNQ --> RewardRelay
+    ANQ --> AchievementRelay
+
+    RankingWorker -.->|"Retry"| RRQ
+    RewardWorker -.->|"Retry"| RRWQ
+    StatisticsWorker -.->|"Retry"| RSQ
+    AchievementsWorker -.->|"Retry"| RAQ
+    RewardRelay -.->|"Retry"| RRNQ
+    AchievementRelay -.->|"Retry"| RANQ
+
+    RRQ --> RQ
+    RRWQ --> RWQ
+    RSQ --> SQ
+    RAQ --> AQ
+    RRNQ --> RNQ
+    RANQ --> ANQ
+
+    RankingWorker -.->|"DLQ"| RDLQ
+    RewardWorker -.->|"DLQ"| RDLWQ
+    StatisticsWorker -.->|"DLQ"| RDLQ2
+    AchievementsWorker -.->|"DLQ"| RDLQ3
+    RewardRelay -.->|"DLQ"| RDLQ4
+    AchievementRelay -.->|"DLQ"| RDLQ5
+
+    classDef exchange fill:#FF9900,color:#fff,stroke:#333,stroke-width:2px
+    classDef queue fill:#FF6600,color:#fff,stroke:#333,stroke-width:1px
+    classDef retry fill:#FF9900,color:#fff,stroke:#333,stroke-width:1px
+    classDef dlq fill:#e74c3c,color:#fff,stroke:#333,stroke-width:1px
+    classDef consumer fill:#512BD4,color:#fff,stroke:#333,stroke-width:1px
+
+    class Exchange exchange
+    class RQ,RWQ,SQ,AQ,RNQ,ANQ queue
+    class RRQ,RRWQ,RSQ,RAQ,RRNQ,RANQ retry
+    class RDLQ,RDLWQ,RDLQ2,RDLQ3,RDLQ4,RDLQ5 dlq
+    class RankingWorker,RewardWorker,StatisticsWorker,AchievementsWorker,RewardRelay,AchievementRelay consumer

@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/RaceHub.AchievementsWorker/RaceHub.AchievementsWorker.csproj" />
+    <Project Path="src/RaceHub.API/RaceHub.API.csproj" />
+    <Project Path="src/RaceHub.Application/RaceHub.Application.csproj" />
+    <Project Path="src/RaceHub.Contracts/RaceHub.Contracts.csproj" />
+    <Project Path="src/RaceHub.Domain/RaceHub.Domain.csproj" />
+    <Project Path="src/RaceHub.Infrastructure/RaceHub.Infrastructure.csproj" />
+    <Project Path="src/RaceHub.RankingWorker/RaceHub.RankingWorker.csproj" />
+    <Project Path="src/RaceHub.RewardWorker/RaceHub.RewardWorker.csproj" />
+    <Project Path="src/RaceHub.StatisticsWorker/RaceHub.StatisticsWorker.csproj" />
+  </Folder>
+</Solution>

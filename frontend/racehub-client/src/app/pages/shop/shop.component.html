@@ -1,0 +1,52 @@
+<div class="panel-head"><h2>Car Shop</h2></div>
+<div class="panel-sub">
+  Spend your race winnings on new machinery
+  @if (coinBalance() !== null) {
+    — <b>{{ coinBalance() | number }} coins</b> available
+  }
+</div>
+
+<div class="tier-tabs">
+  @for (tier of tiers; track tier) {
+    <button
+      class="tier-tab"
+      [class.active]="tierFilter() === tier"
+      (click)="setTier(tier)"
+    >
+      {{ tier ? tier : 'ALL CARS' }}
+    </button>
+  }
+</div>
+
+<div class="shop-grid">
+  @for (item of visibleItems(); track item.id) {
+    <div class="card shop-card" [class.locked]="coinBalance() !== null && coinBalance()! < item.price">
+      <span class="tier-badge" [class.tier-starter]="item.tier === 'STARTER'" [class.tier-entry]="item.tier === 'ENTRY'" [class.tier-sport]="item.tier === 'SPORT'" [class.tier-performance]="item.tier === 'PERFORMANCE'" [class.tier-super]="item.tier === 'SUPER'" [class.tier-hyper]="item.tier === 'HYPER'">{{ item.tier }}</span>
+
+      <div class="shop-swatch" [style.background]="swatchStyle(item)">
+        <div class="shop-icon">{{ item.icon }}</div>
+      </div>
+
+      <div class="car-brand">{{ item.brand }}</div>
+      <div class="car-name" [title]="item.name">{{ item.name }}</div>
+
+      <div class="stat-preview">
+        <div class="stat-row"><span>SPD</span><div class="mini-bar"><div class="mini-fill spd" [style.width.%]="item.topSpeed"></div></div></div>
+        <div class="stat-row"><span>ACC</span><div class="mini-bar"><div class="mini-fill acc" [style.width.%]="item.acceleration"></div></div></div>
+        <div class="stat-row"><span>HDL</span><div class="mini-bar"><div class="mini-fill hdl" [style.width.%]="item.handling"></div></div></div>
+      </div>
+
+      <div class="price-row">● {{ item.price | number }}</div>
+      <button
+        class="btn btn-green btn-block btn-sm"
+        (click)="buyCar(item.id)"
+        [disabled]="buyingId() === item.id"
+      >
+        {{ buyingId() === item.id ? 'Buying...' : 'Buy' }}
+      </button>
+      @if (buyError() && buyingId() === item.id) {
+        <div class="buy-error">{{ buyError() }}</div>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,38 @@
+.profile-head { display: flex; align-items: center; gap: 16px; margin-bottom: 22px; }
+.profile-avatar { width: 66px; height: 66px; font-size: 26px; background: linear-gradient(160deg, #ff8a3d, #e14b2e); border: 3px solid var(--panel-3); }
+.profile-name { font-size: 19px; font-weight: 800; }
+.profile-level { color: var(--text-dim); font-size: 12.5px; margin-bottom: 6px; }
+.xp-bar { width: 220px; height: 8px; background: var(--panel-2); border-radius: 5px; overflow: hidden; position: relative; }
+.xp-bar i { display: block; height: 100%; background: linear-gradient(90deg, #4ade80, var(--green)); }
+.xp-num { font-size: 10.5px; color: var(--text-dimmer); margin-top: 4px; }
+.stat-trio { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
+.stat-tile { padding: 16px; text-align: center; }
+.stat-tile .stat-num { font-size: 22px; font-weight: 800; color: var(--yellow); }
+.stat-tile .stat-lbl { font-size: 11.5px; color: var(--text-dim); margin-top: 4px; }
+.recent-card { padding: 16px 18px; }
+.recent-card h3 { font-size: 13px; color: var(--text-dim); margin-bottom: 12px; }
+.recent-row { display: flex; align-items: center; gap: 12px; padding: 9px 0; border-top: 1px solid var(--border); font-size: 13px; }
+.recent-row:first-of-type { border-top: none; }
+.recent-row .r-ic { font-size: 16px; }
+.recent-row .r-name { flex: 1; font-weight: 600; }
+.recent-row .r-pos { width: 34px; color: var(--text-dim); font-size: 12px; }
+.recent-row .r-time { color: var(--text-dim); font-size: 12px; width: 70px; text-align: right; }
+
+@media (max-width: 900px) {
+  .stat-trio { grid-template-columns: 1fr; }
+}
+
+/* Badge grid — unlocked badges from AchievementsWorker, locked ones shown
+   greyed out so there's always something to chase. */
+.achievements-card { padding: 18px 22px; margin-bottom: 22px; }
+.achievements-card h3 { display: flex; align-items: center; gap: 10px; }
+.ach-count { font-size: 12px; color: var(--text-dim); font-family: 'Inter', sans-serif; font-weight: 700; }
+.ach-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; margin-top: 14px; }
+.ach-badge {
+  border: 1px solid var(--border); border-radius: 12px; padding: 14px;
+  background: rgba(246, 185, 59, .05); text-align: center;
+}
+.ach-badge.locked { opacity: .45; filter: grayscale(.8); }
+.ach-icon { font-size: 26px; margin-bottom: 6px; }
+.ach-title { font-weight: 700; font-size: 12.5px; }
+.ach-desc { font-size: 11px; color: var(--text-dim); margin-top: 4px; line-height: 1.4; }

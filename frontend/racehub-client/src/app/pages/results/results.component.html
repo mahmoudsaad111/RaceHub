@@ -1,0 +1,30 @@
+<div class="card" style="padding:22px;">
+  <div class="results-head">
+    <div><h2>🏆 Race Results</h2><p>Classic Track</p></div>
+  </div>
+
+<table class="results-table">
+  <tr><th>POS</th><th>PLAYER</th><th>TIME</th><th>BEST LAP</th><th>XP</th><th>COINS</th></tr>
+  @for (row of results; track row.player + row.position) {
+    <tr>
+      <td><span class="pos-medal" [class]="row.medalClass">{{ row.medalLabel }}</span></td>
+      <td><div class="player-cell"><div class="avatar">🙂</div>{{ row.player }}</div></td>
+      <td>{{ row.time }}</td>
+      <td>{{ row.bestLap }}</td>
+      <td class="reward">● {{ row.reward }}</td>
+      <td class="reward">
+        {{ row.coins }}
+        @if (row.credited) {
+          <span class="credited-badge">✓ credited</span>
+        }
+      </td>
+    </tr>
+  }
+</table>
+
+  <div class="results-actions">
+    <button class="btn btn-outline" routerLink="/lobby">BACK TO LOBBY</button>
+    <button class="btn btn-blue">VIEW REPLAY</button>
+    <button class="btn btn-yellow" routerLink="/race">PLAY AGAIN</button>
+  </div>
+</div>

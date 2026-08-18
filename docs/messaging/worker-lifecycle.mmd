@@ -1,0 +1,33 @@
+flowchart TD
+    Start([Message Received]) --> Idempotency{Already<br>Processed?}
+    Idempotency -->|Yes| Ack[ACK & Skip]
+    Idempotency -->|No| Process[Process Message]
+
+    Process --> Deserialize[Deserialize Event]
+    Deserialize --> Validate{Valid?}
+    Validate -->|No| Ack
+    Validate -->|Yes| Business[Execute Business Logic]
+
+    Business --> DB{DB Operation<br>Success?}
+    DB -->|No| Retry{Retry Count<br>< 5?}
+    Retry -->|Yes| Backoff[Exponential Backoff<br/>1s → 2s → 4s → 8s → 16s]
+    Backoff --> Process
+    Retry -->|No| DLQ[Move to Dead Letter Queue]
+    DLQ --> Nack[NACK Message]
+
+    DB -->|Yes| Mark[Record ProcessedMessage]
+    Mark --> ACK[ACK Message]
+    ACK --> End([End])
+
+    Nack --> End
+    Ack --> End
+
+    classDef decision fill:#f39c12,color:#fff,stroke:#333,stroke-width:1px
+    classDef process fill:#3498db,color:#fff,stroke:#333,stroke-width:1px
+    classDef terminal fill:#2ecc71,color:#fff,stroke:#333,stroke-width:1px
+    classDef error fill:#e74c3c,color:#fff,stroke:#333,stroke-width:1px
+
+    class Idempotency,Validate,DB,Retry decision
+    class Process,Deserialize,Business,Backoff,Mark process
+    class Start,End terminal
+    class DLQ,Nack,Ack,ACK error

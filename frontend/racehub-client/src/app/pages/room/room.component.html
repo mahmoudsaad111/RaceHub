@@ -1,0 +1,187 @@
+<a class="back-link" routerLink="/lobby">← Back to Lobby</a>
+
+@if (errorMessage) {
+  <div class="fr-error" style="margin-bottom:16px;">
+    {{ errorMessage }}
+    <button class="btn btn-outline btn-sm" style="margin-left:12px;" (click)="errorMessage = null">Dismiss</button>
+  </div>
+}
+
+<div class="room-detail-head">
+  <div class="rd-title">
+    <div>
+      <div class="rd-room-row">
+        <h2 class="room-code">ROOM #{{ roomCode }}</h2>
+        <span class="pill pill-purple">PRIVATE</span>
+      </div>
+      <div class="track">{{ race?.trackName || 'Track' }}</div>
+    </div>
+  </div>
+  <button class="btn btn-outline btn-sm" (click)="toggleInvitePanel()">✉ INVITE FRIENDS</button>
+  <div class="rd-count">
+    <b>{{ playerCount }}</b><span> / {{ race?.maxPlayers ?? 8 }}</span>
+    <div class="rd-count-label">DRIVERS</div>
+  </div>
+</div>
+
+@if (showInvitePanel) {
+  <div class="card invite-panel">
+    <div class="fr-header">
+      <h3>Invite Friends</h3>
+      <button class="btn btn-outline btn-sm" (click)="showInvitePanel = false">Close</button>
+    </div>
+
+    @if (inviteFriends.length > 0) {
+      <div class="fr-list">
+        @for (friend of inviteFriends; track friend.userId) {
+          <div class="fr-item">
+            <div class="avatar inv-avatar">{{ initials(friend.displayName) }}<span class="presence-dot" [class.online]="friend.isOnline"></span></div>
+            <div class="fr-info">
+              <div class="fr-name">{{ friend.displayName }}</div>
+              <div class="fr-time">{{ friend.isOnline ? 'Online' : 'Offline' }}</div>
+            </div>
+            <div class="fr-actions">
+              @if (invitedUserIds.has(friend.userId)) {
+                <span class="pill pill-purple">Invited</span>
+              } @else {
+                <button
+                  class="btn btn-blue btn-sm"
+                  (click)="inviteFriend(friend.userId)"
+                  [disabled]="!friend.isOnline"
+                >
+                  Invite
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <p class="fr-empty">No friends available to invite — they may already be in this room.</p>
+    }
+
+    @if (inviteError) {
+      <div class="fr-error">{{ inviteError }}</div>
+    }
+  </div>
+}
+
+<div class="grid-heading">STARTING GRID</div>
+<div class="slots-row">
+  @for (slot of slots; track slot.name + $index) {
+    <div
+      class="slot"
+      [class.empty]="slot.empty"
+      [class.state-ready]="!slot.empty && slot.isReady"
+      [class.state-host]="!slot.empty && slot.isHost"
+      [class.self]="slot.isSelf"
+    >
+      <div class="car-badge" [style.background]="carSwatchStyle(slot.carName)">
+        @if (slot.empty) {
+          <span class="empty-plus">＋</span>
+        } @else {
+          <span class="car-emoji">{{ carIcon(slot.carName) }}</span>
+        }
+      </div>
+      <div class="s-name" [title]="slot.carName ?? ''">{{ slot.empty ? 'Open seat' : slot.name }}</div>
+      @if (!slot.empty) {
+        <div class="s-car">{{ slot.carName }}</div>
+        <div class="s-tag">
+          @if (slot.isHost) {
+            <span class="tag-chip tag-host">👑 HOST</span>
+          }
+          @if (slot.isReady) {
+            <span class="tag-chip tag-ready">✓ READY</span>
+          } @else {
+            <span class="tag-chip tag-wait">WAITING…</span>
+          }
+        </div>
+      } @else {
+        <div class="s-car dim">waiting for driver</div>
+      }
+    </div>
+  }
+</div>
+
+<div class="ready-bar">
+  <div class="rb-track"><div class="rb-fill" [style.width.%]="playerCount > 0 ? (readyCount / playerCount) * 100 : 0"></div></div>
+  <span class="rb-label">{{ readyCount }} / {{ playerCount }} ready</span>
+</div>
+
+@if (isPlayer && !isSelfReady) {
+  <div class="car-strip-wrap">
+    <div class="field-label">YOUR CAR — <span class="field-note">tap to switch (locked once you're ready)</span></div>
+    <div class="car-strip">
+      @for (car of cars; track car.id) {
+        <button
+          class="tile car-chip"
+          [class.selected]="selectedCarId === car.id"
+          (click)="pickCar(car.id)"
+          [disabled]="changingCar"
+          [title]="car.name"
+        >
+          <div class="chip-swatch" [style.background]="carSwatchStyle(car.name)">{{ carIcon(car.name) }}</div>
+          <div class="chip-name">{{ car.name }}</div>
+        </button>
+      }
+    </div>
+  </div>
+}
+
+<div class="rd-actions">
+  @if (isHost) {
+    <button class="btn btn-outline" (click)="deleteRoom()" [disabled]="deleting">{{ deleting ? 'DELETING…' : 'DELETE ROOM' }}</button>
+  }
+  <button class="btn btn-outline" (click)="leaveRoom()" [disabled]="leaving">{{ leaving ? 'LEAVING…' : 'LEAVE ROOM' }}</button>
+  @if (!isPlayer) {
+    <button class="btn btn-green" (click)="joinRace()" [disabled]="joining">{{ joining ? 'JOINING…' : 'JOIN RACE' }}</button>
+  } @else {
+    <button
+      [class.btn-green]="!isSelfReady"
+      [class.btn-outline]="isSelfReady"
+      class="btn ready-btn"
+      (click)="markReady()"
+      [disabled]="markingReady"
+    >
+      {{ markingReady ? 'UPDATING…' : isSelfReady ? '✓ READY — tap to unready' : 'MARK READY' }}
+    </button>
+  }
+  <div class="start">
+    <button class="btn btn-yellow start-btn" (click)="startRace()" [disabled]="!isHost || starting">
+      {{ isHost ? (starting ? 'STARTING…' : '🏁 START RACE') : 'WAITING FOR HOST…' }}
+    </button>
+    @if (!allReady) {
+      <small>Waiting for players to be ready…</small>
+    } @else {
+      <small class="all-ready">All players ready!</small>
+    }
+  </div>
+</div>
+
+<div class="rd-lower">
+  <div class="card chat-card">
+    <div class="chat-msgs" #chatScroll>
+      @for (msg of chatMessages; track msg.senderId + msg.sentAtUtc) {
+        <div class="chat-line"><b>{{ msg.displayName }}:</b> {{ msg.content }}</div>
+      }
+      @if (chatMessages.length === 0) {
+        <div class="chat-empty">No messages yet — say hi to your rivals 👋</div>
+      }
+    </div>
+    <div class="chat-input">
+      <input [(ngModel)]="chatInput" (keydown.enter)="sendChat()" placeholder="Type a message…" />
+      <span class="chat-send" (click)="sendChat()">➤</span>
+    </div>
+  </div>
+  <div class="card track-card">
+    <div class="track-preview">
+      <span>🗺️</span>
+      <span class="tp-name">{{ race?.trackName || 'Track' }}</span>
+    </div>
+    <div class="track-stats">
+      <div><div class="lbl">LAPS</div><b>{{ race?.totalLaps || 5 }}</b></div>
+      <div><div class="lbl">PLAYERS</div><b>{{ race?.maxPlayers || 8 }}</b></div>
+      <div><div class="lbl">LENGTH</div><b>2.4 km</b></div>
+    </div>
+  </div>
+</div>

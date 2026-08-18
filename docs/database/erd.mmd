@@ -1,0 +1,208 @@
+erDiagram
+    User ||--o{ UserCar : owns
+    User ||--o{ RacePlayer : participates
+    User ||--o{ Friendship : "has_friend"
+    User ||--o{ Notification : receives
+    User ||--o{ UserAchievement : unlocks
+    User ||--o{ PlayerStatistics : has
+    User ||--o{ RaceHistoryEntry : "has_history"
+    User ||--o{ RefreshToken : has
+    User ||--o{ OutboxMessage : publishes
+    User ||--o{ ChatMessage : sends
+    User ||--o{ ProcessedMessage : "tracks_processed"
+
+    Car ||--o{ UserCar : "referenced_by"
+    Car ||--o{ RacePlayer : "selected_as"
+
+    Track ||--o{ TrackCheckpoint : has
+    Track ||--o{ Race : "hosted_on"
+
+    Race ||--o{ RacePlayer : contains
+    Race ||--o{ RaceResult : produces
+    Race ||--o{ Lap : records
+    Race ||--o{ RaceHistoryEntry : "generates"
+
+    RacePlayer ||--o{ RaceResult : achieves
+    RacePlayer ||--o{ Lap : completes
+
+    RaceResult ||--o{ RaceHistoryEntry : "contributes_to"
+
+    Achievement ||--o{ UserAchievement : "awarded_as"
+    Achievement ||--o{ Notification : triggers
+
+    ProcessedMessage ||--o| OutboxMessage : "tracks"
+
+    User {
+        string Id PK
+        string UserName
+        string Email
+        int Coins
+        int ExperiencePoints
+        int Level
+        datetime CreatedAt
+        datetime UpdatedAt
+    }
+
+    Car {
+        int Id PK
+        string Name
+        int TopSpeed
+        int Acceleration
+        int Handling
+        int Braking
+        int NitroCapacity
+        int Price
+        string ImageUrl
+        string Category
+    }
+
+    UserCar {
+        int Id PK
+        string UserId
+        int CarId
+        datetime PurchasedAt
+    }
+
+    Track {
+        int Id PK
+        string Name
+        string Difficulty
+        int Length
+        string Environment
+        json CheckpointGeometry
+    }
+
+    TrackCheckpoint {
+        int Id PK
+        int TrackId
+        int Order
+        float X
+        float Y
+        float Z
+    }
+
+    Race {
+        int Id PK
+        string HostId
+        int TrackId
+        string Status
+        int MaxPlayers
+        int Laps
+        datetime StartedAt
+        datetime FinishedAt
+        datetime CreatedAt
+    }
+
+    RacePlayer {
+        int Id PK
+        string UserId
+        int RaceId
+        int CarId
+        string Status
+        int Position
+        datetime JoinedAt
+    }
+
+    RaceResult {
+        int Id PK
+        int RacePlayerId
+        int Position
+        float TotalTime
+        int RatingChange
+        datetime FinishedAt
+    }
+
+    Lap {
+        int Id PK
+        int RacePlayerId
+        int LapNumber
+        float Time
+        datetime CompletedAt
+    }
+
+    PlayerStatistics {
+        string UserId PK
+        int Rating
+        int RacesPlayed
+        int Wins
+        int Podiums
+        float BestTime
+        datetime UpdatedAt
+    }
+
+    RaceHistoryEntry {
+        int Id PK
+        string UserId
+        int RaceId
+        int Position
+        float TotalTime
+        int CoinsEarned
+        int XpEarned
+        int RatingChange
+        datetime FinishedAt
+    }
+
+    Achievement {
+        int Id PK
+        string Name
+        string Description
+        string IconUrl
+        int XpReward
+        int CoinReward
+        string Criteria
+    }
+
+    UserAchievement {
+        int Id PK
+        string UserId
+        int AchievementId
+        datetime UnlockedAt
+    }
+
+    Notification {
+        int Id PK
+        string UserId
+        string Type
+        string Title
+        string Message
+        bool IsRead
+        datetime CreatedAt
+    }
+
+    Friendship {
+        int Id PK
+        string UserId
+        string FriendId
+        string Status
+        datetime CreatedAt
+    }
+
+    ChatMessage {
+        int Id PK
+        int RaceId
+        string UserId
+        string Message
+        datetime SentAt
+    }
+
+    RefreshToken {
+        int Id PK
+        string UserId
+        string Token
+        datetime ExpiresAt
+        datetime CreatedAt
+    }
+
+    OutboxMessage {
+        int Id PK
+        string Type
+        string Payload
+        datetime CreatedAt
+        datetime? PublishedAt
+    }
+
+    ProcessedMessage {
+        string MessageId PK
+        string QueueName
+        datetime ProcessedAt
+    }

@@ -1,0 +1,100 @@
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="logo-full"><span class="flag-icon">🏁</span> RACEHUB</div>
+
+    <a class="user-block" routerLink="/profile" routerLinkActive="active" style="text-decoration:none;color:inherit;">
+      <div class="avatar">🏎️</div>
+      <div>
+        <div class="u-name">{{ currentUser()?.displayName || 'Racer' }}</div>
+        <div class="u-status">Online</div>
+      </div>
+    </a>
+
+    <nav class="nav-list">
+      <a class="nav-item" routerLink="/lobby" routerLinkActive="active">
+        <span class="ic">🏠</span>Lobby
+      </a>
+      <a class="nav-item" routerLink="/profile" routerLinkActive="active">
+        <span class="ic">👤</span>Profile
+      </a>
+      <a class="nav-item" routerLink="/garage" routerLinkActive="active">
+        <span class="ic">🚗</span>Garage
+      </a>
+      <a class="nav-item" routerLink="/friends" routerLinkActive="active">
+        <span class="ic">👥</span>Friends
+      </a>
+      <a class="nav-item" routerLink="/shop" routerLinkActive="active">
+        <span class="ic">🛒</span>Shop
+      </a>
+      <a class="nav-item" routerLink="/settings" routerLinkActive="active">
+        <span class="ic">⚙️</span>Settings
+      </a>
+    </nav>
+
+    <a class="nav-item nav-logout" href="javascript:void(0)" (click)="logout()">
+      <span class="ic">↩</span>Logout
+    </a>
+  </aside>
+
+  <div class="main-col">
+    <div class="topbar">
+      <div class="currency"><span class="dot dot-coin">●</span>{{ coins | number }}</div>
+      <div class="currency"><span class="dot dot-gem">◆</span>{{ gems | number }}</div>
+      <div class="bell" (click)="toggleNotifications()">
+        🔔
+        @if (notificationCount > 0) {
+          <span class="badge">{{ notificationCount }}</span>
+        }
+        @if (showNotifications) {
+          <div class="notification-dropdown">
+            @if (notifications.length === 0) {
+              <div class="no-notifications">No notifications</div>
+            } @else {
+              @for (notification of notifications; track notification.notificationId) {
+                <div class="notification-item" [class.unread]="!notification.isRead">
+                  <div class="notif-title">{{ notification.title }}</div>
+                  <div class="notif-message">{{ notification.message }}</div>
+                </div>
+              }
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    @if (levelUpToast) {
+      <div class="level-up-toast">{{ levelUpToast.message }}</div>
+    }
+
+    @if (achievementToast) {
+      <div class="level-up-toast achievement-toast">
+        <b>🏆 Achievement unlocked: {{ achievementToast.title }}</b>
+        <div>{{ achievementToast.description }}</div>
+      </div>
+    }
+
+    <div class="content">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+
+  @if (pendingInvites.length > 0) {
+    <div class="invite-toast-stack">
+      @if (inviteError) {
+        <div class="fr-error">{{ inviteError }}</div>
+      }
+      @for (invite of pendingInvites; track invite.raceId + invite.fromUserId) {
+        <div class="invite-toast">
+          <div class="invite-toast-body">
+            <b>{{ invite.fromDisplayName }}</b> invited you to race
+            <div class="invite-toast-meta">{{ invite.trackName }} · {{ invite.currentPlayers }}/{{ invite.maxPlayers }} players</div>
+          </div>
+          <div class="invite-toast-actions">
+            <button class="btn btn-green btn-sm" (click)="acceptInvite(invite)" [disabled]="respondingToInvite">Accept</button>
+            <button class="btn btn-outline btn-sm" (click)="declineInvite(invite)" [disabled]="respondingToInvite">Decline</button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,57 @@
+<h2 style="margin-bottom:18px;">Leaderboard</h2>
+
+<div class="lb-layout">
+  <div>
+    <div class="lb-tabs">
+      @for (tab of tabs; track tab) {
+        <button
+          class="lb-tab"
+          [class.active]="activeTab() === tab"
+          (click)="selectTab(tab)">
+          {{ tab }}
+        </button>
+      }
+    </div>
+    @if (activeTab() === 'TRACK') {
+      <select class="lb-track-select" [(ngModel)]="trackId" (change)="selectTrack()">
+        @for (track of tracks; track track.id) {
+          <option [value]="track.id">{{ track.name }}</option>
+        }
+      </select>
+    }
+    <div class="lb-trophy">🏆</div>
+  </div>
+
+  <div class="card lb-table-card">
+    @if (loading) {
+      <div class="lb-empty">Loading…</div>
+    } @else if (errorMessage) {
+      <div class="lb-empty">{{ errorMessage }}</div>
+    } @else if (entries.length === 0) {
+      <div class="lb-empty">Nothing here yet — go race!</div>
+    } @else {
+      <table class="lb-table">
+        <tr>
+          <th>RANK</th>
+          <th>PLAYER</th>
+          @if (activeTab() === 'GLOBAL' || activeTab() === 'FRIENDS') {
+            <th>RATING</th>
+          }
+          <th>WINS</th>
+          <th>BEST TIME</th>
+        </tr>
+        @for (entry of entries; track entry.userId) {
+          <tr class="lb-row" [class.me]="isMe(entry)">
+            <td>{{ rank($index) }}</td>
+            <td><div class="player-cell"><div class="avatar">{{ isMe(entry) ? '🏎️' : '🙂' }}</div>{{ entry.displayName }}</div></td>
+            @if (activeTab() === 'GLOBAL' || activeTab() === 'FRIENDS') {
+              <td class="lb-rating">{{ entry.ratingPoints ?? 0 }}</td>
+            }
+            <td>{{ entry.wins }}</td>
+            <td>{{ bestTime(entry) }}</td>
+          </tr>
+        }
+      </table>
+    }
+  </div>
+</div>

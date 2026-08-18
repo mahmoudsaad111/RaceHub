@@ -1,0 +1,74 @@
+graph TB
+    subgraph Frontend["Frontend Layer"]
+        direction TB
+        Client[Angular SPA<br/>racehub-client]
+        Nginx[Nginx Proxy<br/>:80]
+    end
+
+    subgraph API["API Layer"]
+        direction TB
+        Controllers[REST Controllers]
+        SignalR[SignalR Hubs]
+        Hosted[Hosted Services]
+    end
+
+    subgraph Workers["Background Workers"]
+        direction TB
+        Ranking[RankingWorker]
+        Reward[RewardWorker]
+        Statistics[StatisticsWorker]
+        Achievements[AchievementsWorker]
+    end
+
+    subgraph Messaging["Message Broker"]
+        direction TB
+        Exchange[race.events<br/>Topic Exchange]
+        Relay[Notification Relays]
+    end
+
+    subgraph Data["Data Layer"]
+        direction TB
+        SQL[(SQL Server 2022<br/>RaceHubDb)]
+        Redis[(Redis<br/>Presence/Cache)]
+    end
+
+    subgraph Infra["Infrastructure"]
+        RabbitMQ[RabbitMQ 3<br/>:5672 / :15672]
+    end
+
+    Client -->|"HTTP/WebSocket"| Nginx
+    Nginx -->|"Proxy"| Controllers
+    Nginx -->|"Proxy"| SignalR
+    Controllers -->|"CQRS MediatR"| Domain
+    SignalR -->|"Realtime Events"| Client
+    Controllers -->|"Publish"| Outbox
+    Hosted -->|"Relay"| SignalR
+    Controllers --> SQL
+    SignalR --> Redis
+    Ranking --> SQL
+    Reward --> SQL
+    Statistics --> SQL
+    Achievements --> SQL
+
+    Exchange -.->|"race.finished"| Ranking
+    Exchange -.->|"race.finished"| Reward
+    Exchange -.->|"race.finished"| Statistics
+    Exchange -.->|"race.finished"| Achievements
+    Exchange -.->|"reward.credited"| Relay
+    Exchange -.->|"achievement.unlocked"| Relay
+
+    RabbitMQ --> Exchange
+
+    classDef frontend fill:#DD0031,color:#fff,stroke:#333,stroke-width:2px
+    classDef api fill:#512BD4,color:#fff,stroke:#333,stroke-width:2px
+    classDef worker fill:#FF6600,color:#fff,stroke:#333,stroke-width:2px
+    classDef messaging fill:#FF9900,color:#fff,stroke:#333,stroke-width:2px
+    classDef data fill:#CC2927,color:#fff,stroke:#333,stroke-width:2px
+    classDef infra fill:#00BCD4,color:#fff,stroke:#333,stroke-width:2px
+
+    class Client,Nginx frontend
+    class Controllers,SignalR,Hosted api
+    class Ranking,Reward,Statistics,Achievements worker
+    class Exchange,Relay messaging
+    class SQL,Redis data
+    class RabbitMQ infra

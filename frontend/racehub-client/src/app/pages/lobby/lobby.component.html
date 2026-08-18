@@ -1,0 +1,220 @@
+<div class="lobby-head">
+  <div>
+    <h2 class="page-title">RACE LOBBY</h2>
+    <p class="page-sub">Create a room or join with friends</p>
+  </div>
+  <div class="lobby-actions">
+    <button class="btn btn-yellow" (click)="openCreateRoom()">➕ CREATE ROOM</button>
+    <button class="btn btn-outline" (click)="showFriendRequests = !showFriendRequests">
+      👥 FRIENDS
+      @if (friendRequests.length > 0) {
+        <span class="btn-badge">{{ friendRequests.length }}</span>
+      }
+    </button>
+  </div>
+</div>
+
+@if (errorMessage) {
+  <div class="fr-error" style="margin-bottom:16px;">
+    {{ errorMessage }}
+    <button class="btn btn-outline btn-sm" style="margin-left:12px;" (click)="errorMessage = null">Dismiss</button>
+  </div>
+}
+
+@if (showCreateRoom) {
+  <div class="card create-panel">
+    <div class="fr-header">
+      <h3>Create Room</h3>
+      <button class="btn btn-outline btn-sm" (click)="closeCreateRoom()">Close</button>
+    </div>
+
+    <div class="picker-section">
+      <div class="field-label">1 · Choose track</div>
+      <div class="track-tiles">
+        @for (track of tracks; track track.id) {
+          <button
+            class="tile track-tile"
+            [class.selected]="createTrackId === track.id"
+            (click)="createTrackId = track.id"
+          >
+            <div class="tt-visual" [style.background]="trackGradient(track.difficulty)">
+              <span class="tt-icon">{{ difficultyLabel(track.difficulty) === 'EASY' ? '🏁' : difficultyLabel(track.difficulty) === 'MEDIUM' ? '🏜️' : '🏙️' }}</span>
+              <span class="tt-diff" [class.diff-1]="track.difficulty <= 1" [class.diff-2]="track.difficulty === 2" [class.diff-3]="track.difficulty >= 3">
+                {{ difficultyLabel(track.difficulty) }}
+              </span>
+            </div>
+            <div class="tt-body">
+              <div class="tt-name">{{ track.name }}</div>
+              <div class="tt-meta">
+                <span>🔛 {{ track.totalLaps }} laps</span>
+                @if (personalBests.get(track.id); as pb) {
+                  <span class="tt-pb">PB {{ pb / 1000 | number: '1.1-1' }}s</span>
+                }
+              </div>
+            </div>
+          </button>
+        }
+      </div>
+      @if (selectedTrackPb(); as pb) {
+        <div class="pb-hint">🏁 Your best on this track: <b>{{ pb }}</b></div>
+      }
+    </div>
+
+    <div class="picker-section">
+      <div class="field-label">2 · Choose car <span class="field-note">from your garage</span></div>
+      <div class="car-tiles">
+        @for (car of cars; track car.id) {
+          <button
+            class="tile car-tile"
+            [class.selected]="createCarId === car.id"
+            (click)="createCarId = car.id"
+          >
+            <div class="ct-swatch" [style.background]="'linear-gradient(150deg,' + carColor(car.name) + ', #10131c)'">
+              {{ carIcon(car.name) }}
+            </div>
+            <div class="ct-name" [title]="car.name">{{ car.name }}</div>
+            <div class="ct-stats">
+              <div class="ct-stat"><span>SPD</span><div class="ct-bar"><i [style.width.%]="car.topSpeed"></i></div></div>
+              <div class="ct-stat"><span>ACC</span><div class="ct-bar"><i class="acc" [style.width.%]="car.acceleration"></i></div></div>
+            </div>
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="picker-row">
+      <div class="field">
+        <div class="field-label">3 · Max players</div>
+        <div class="stepper">
+          <button class="step-btn" (click)="decPlayers()" [disabled]="createMaxPlayers <= 2">−</button>
+          <div class="step-value">{{ createMaxPlayers }}</div>
+          <button class="step-btn" (click)="incPlayers()" [disabled]="createMaxPlayers >= 8">＋</button>
+        </div>
+      </div>
+      <button
+        class="btn btn-green create-btn"
+        (click)="createRoom()"
+        [disabled]="creatingRoom || !createTrackId || !createCarId"
+      >
+        {{ creatingRoom ? 'CREATING…' : '🏁 CREATE ROOM' }}
+      </button>
+    </div>
+
+    @if (createError) {
+      <div class="fr-error">{{ createError }}</div>
+    }
+  </div>
+}
+
+@if (showFriendRequests) {
+  <div class="card create-panel">
+    <div class="fr-header">
+      <h3>Friend Requests</h3>
+      <button class="btn btn-outline btn-sm" (click)="showFriendRequests = false">Close</button>
+    </div>
+
+    @if (friendRequests.length > 0) {
+      <div class="fr-list">
+        @for (req of friendRequests; track req.friendshipId) {
+          <div class="fr-item">
+            <div class="avatar fr-avatar">{{ initials(req.requesterDisplayName) }}</div>
+            <div class="fr-info">
+              <div class="fr-name">{{ req.requesterDisplayName }}</div>
+              <div class="fr-time">{{ req.createdAtUtc | date:'short' }}</div>
+            </div>
+            <div class="fr-actions">
+              <button class="btn btn-green btn-sm" (click)="respondToRequest(req.friendshipId, true)">ACCEPT</button>
+              <button class="btn btn-outline btn-sm" (click)="respondToRequest(req.friendshipId, false)">DECLINE</button>
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <p class="fr-empty">No pending friend requests.</p>
+    }
+
+    <div class="fr-send">
+      <h4>Send Friend Request</h4>
+      <div class="fr-send-row">
+        <input class="input" [(ngModel)]="friendEmail" placeholder="Enter friend's email" (keydown.enter)="sendFriendRequest()" />
+        <button class="btn btn-blue btn-sm" (click)="sendFriendRequest()" [disabled]="sendingRequest || !friendEmail.trim()">
+          {{ sendingRequest ? 'SENDING…' : 'SEND' }}
+        </button>
+      </div>
+      @if (requestError) {
+        <div class="fr-error">{{ requestError }}</div>
+      }
+    </div>
+  </div>
+}
+
+<div class="lobby-grid">
+  <div class="card room-list-card">
+    <div class="room-list-toolbar">
+      <span class="toolbar-title">OPEN ROOMS <span class="toolbar-count">{{ rooms.length }}</span></span>
+      <button class="btn btn-outline btn-sm" (click)="refresh()">⟳ Refresh</button>
+    </div>
+
+    @if (rooms.length > 0) {
+      @for (room of rooms; track room.code) {
+        <div class="room-row">
+          <div class="room-thumb">{{ room.icon }}</div>
+          <div class="room-info">
+            <div class="name">{{ room.code }}</div>
+            <div class="track">{{ room.track }}</div>
+            <div class="occ-meter">
+              @for (i of [1,2,3,4,5,6,7,8]; track i) {
+                @if (i <= room.maxPlayers) {
+                  <span class="occ-dot" [class.filled]="i <= room.players" [class.full]="room.players >= room.maxPlayers"></span>
+                }
+              }
+            </div>
+          </div>
+          <div class="room-occ" [class.full]="room.players >= room.maxPlayers">{{ room.players }}/{{ room.maxPlayers }}</div>
+          <button class="btn btn-green btn-sm join-btn" (click)="joinRoom(room)" [disabled]="joiningRoomId === room.id">
+            {{ joiningRoomId === room.id ? 'JOINING…' : 'JOIN' }}
+          </button>
+        </div>
+      }
+    } @else if (!loading) {
+      <div class="rooms-empty">
+        <div class="re-icon">🏁</div>
+        <div class="re-title">No open rooms right now</div>
+        <div class="re-sub">Be the first — create a room and invite your friends</div>
+        <button class="btn btn-yellow btn-sm" (click)="openCreateRoom()">➕ CREATE ROOM</button>
+      </div>
+    }
+  </div>
+
+  <div class="card friends-card">
+    <h3>FRIENDS <span class="toolbar-count">{{ friendsOnlineCount }}</span></h3>
+    @if (friends.length > 0) {
+      @for (friend of friends; track friend.userId) {
+        <div class="friend-row">
+          <div class="avatar friend-avatar">
+            {{ initials(friend.displayName) }}
+            <span class="presence-dot" [class.online]="friend.online"></span>
+          </div>
+          <div class="friend-body">
+            <div class="f-name">{{ friend.displayName }}</div>
+            <div class="f-status" [class.online]="friend.online">
+              {{ friend.currentRace ? 'In a race — ' + friend.currentRace.trackName : friend.status }}
+            </div>
+          </div>
+          @if (friend.currentRace && friend.currentRace.status === 'Waiting' && friend.currentRace.currentPlayers < friend.currentRace.maxPlayers) {
+            <button
+              class="btn btn-green btn-sm"
+              (click)="joinFriendRace(friend)"
+              [disabled]="joiningRoomId === friend.currentRace!.raceId"
+            >
+              {{ joiningRoomId === friend.currentRace!.raceId ? 'JOINING…' : 'JOIN' }}
+            </button>
+          }
+        </div>
+      }
+    } @else {
+      <div class="friends-empty">Add friends to see when they're online</div>
+    }
+    <button class="btn btn-blue btn-block btn-sm" (click)="showFriendRequests = true">✉ ADD FRIENDS</button>
+  </div>
+</div>

@@ -1,0 +1,89 @@
+graph BT
+    subgraph External["External Dependencies"]
+        direction TB
+        EF[Entity Framework Core]
+        Rabbit[RabbitMQ.Client]
+        Identity[ASP.NET Identity]
+        SignalR[SignalR]
+        RedisClient[StackExchange.Redis]
+        Fluent[FluentValidation]
+        MediatR[MediatR]
+    end
+
+    subgraph Infrastructure["Infrastructure Layer"]
+        direction TB
+        Persistence[Repositories / DbContext]
+        Messaging[RabbitMQ Topology / Consumers]
+        Auth[JWT / Google Auth Handlers]
+        Realtime[SignalR Presence / Redis]
+        UnitOfWork[Unit of Work]
+    end
+
+    subgraph Application["Application Layer"]
+        direction TB
+        CQRS[CQRS Handlers]
+        Validators[FluentValidation Validators]
+        DTOs[Request/Response DTOs]
+        Interfaces[Repository Interfaces]
+        Behaviors[Pipeline Behaviors]
+    end
+
+    subgraph Domain["Domain Layer"]
+        direction TB
+        Entities[Entities]
+        Events[Domain Events]
+        Enums[Enums / Value Objects]
+        Aggregates[Aggregate Roots]
+    end
+
+    subgraph API["API Layer"]
+        direction TB
+        Controllers[REST Controllers]
+        Hubs[SignalR Hubs]
+        Middleware[Exception Middleware]
+        Hosted[Hosted Services]
+    end
+
+    External --> Infrastructure
+    Infrastructure --> Application
+    Application --> Domain
+    API --> Application
+
+    EF --> Persistence
+    Rabbit --> Messaging
+    Identity --> Auth
+    SignalR --> Realtime
+    RedisClient --> Realtime
+    Fluent --> Validators
+    MediatR --> CQRS
+
+    Persistence --> UnitOfWork
+    Messaging --> Persistence
+    Auth --> Persistence
+    Realtime --> Persistence
+
+    CQRS --> Interfaces
+    Validators --> Interfaces
+    Behaviors --> CQRS
+
+    Interfaces --> Persistence
+
+    CQRS --> Entities
+    Validators --> DTOs
+
+    Controllers --> CQRS
+    Hubs --> Realtime
+    Middleware --> Controllers
+    Hosted --> Messaging
+
+    classDef external fill:#e74c3c,color:#fff,stroke:#333,stroke-width:1px
+    classDef infra fill:#3498db,color:#fff,stroke:#333,stroke-width:1px
+    classDef app fill:#2ecc71,color:#fff,stroke:#333,stroke-width:1px
+    classDef domain fill:#f39c12,color:#fff,stroke:#333,stroke-width:1px
+    classDef api fill:#9b59b6,color:#fff,stroke:#333,stroke-width:1px
+
+    class EF,Rabbit,Identity,SignalR,RedisClient,Fluent,MediatR external
+    class Persistence,Messaging,Auth,Realtime,UnitOfWork infra
+    class CQRS,Validators,DTOs,Interfaces,Behaviors app
+    class Entities,Events,Enums,Aggregates domain
+    class Controllers,Hubs,Middleware,Hosted api

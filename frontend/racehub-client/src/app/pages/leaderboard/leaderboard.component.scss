@@ -1,0 +1,26 @@
+.lb-tabs { display: flex; flex-direction: column; gap: 8px; width: 150px; }
+.lb-tab { padding: 12px 16px; border-radius: 10px; text-align: left; font-weight: 700; font-size: 13.5px; border: 1px solid var(--border); background: var(--panel); color: var(--text-dim); cursor: pointer; }
+.lb-tab.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+.lb-trophy { margin-top: 16px; text-align: center; font-size: 52px; opacity: .85; }
+.lb-layout { display: flex; gap: 20px; align-items: flex-start; }
+.lb-table-card { flex: 1; padding: 8px 18px 18px; }
+.lb-table { width: 100%; border-collapse: collapse; }
+.lb-table th { text-align: left; font-size: 11px; color: var(--text-dimmer); padding: 14px 10px 10px; font-weight: 700; }
+.lb-table td { padding: 11px 10px; border-top: 1px solid var(--border); font-size: 13.5px; }
+.lb-table .player-cell { display: flex; align-items: center; gap: 10px; }
+.lb-table .player-cell .avatar { width: 26px; height: 26px; font-size: 10px; }
+.lb-row.me { background: var(--panel-2); border-radius: 10px; }
+.lb-row.me td:first-child { border-radius: 10px 0 0 10px; }
+.lb-row.me td:last-child { border-radius: 0 10px 10px 0; }
+
+@media (max-width: 900px) {
+  .lb-layout { grid-template-columns: 1fr; display: flex; flex-direction: column; }
+}
+
+.lb-track-select {
+  margin-top: 12px; width: 100%; padding: 10px 12px; border-radius: 10px;
+  background: var(--panel-2); border: 1px solid var(--border); color: var(--text);
+  font-weight: 700; font-size: 13px; cursor: pointer;
+}
+.lb-empty { padding: 34px; text-align: center; color: var(--text-dim); font-size: 13.5px; }
+.lb-rating { font-weight: 800; color: var(--yellow); }

@@ -1,0 +1,199 @@
+networks:
+  racehub-network:
+    driver: bridge
+
+volumes:
+  sqlserver-data:
+  rabbitmq-data:
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: racehub-sqlserver
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${SQL_SA_PASSWORD}
+      MSSQL_PID: Express
+    ports:
+      # Exposed on the host only for local debugging with SSMS/Azure Data
+      # Studio; racehub-api talks to it over the internal network below.
+      - "1433:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    networks:
+      - racehub-network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -Q 'SELECT 1' || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: racehub-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    ports:
+      - "5672:5672"   # AMQP — used by the API and every worker
+      - "15672:15672" # management UI — http://localhost:15672, login with the credentials above
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - racehub-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  racehub-api:
+    build:
+      context: ./backend
+      dockerfile: src/RaceHub.API/Dockerfile
+    container_name: racehub-api
+    restart: unless-stopped
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      ConnectionStrings__DefaultConnection: "Server=sqlserver;Database=RaceHubDb;User Id=sa;Password=${SQL_SA_PASSWORD};TrustServerCertificate=True;"
+      Jwt__SecretKey: ${JWT_SECRET_KEY}
+      Jwt__Issuer: ${JWT_ISSUER:-RaceHub}
+      Jwt__Audience: ${JWT_AUDIENCE:-RaceHubClient}
+      Jwt__AccessTokenExpirationMinutes: ${JWT_ACCESS_TOKEN_MINUTES:-15}
+      Jwt__RefreshTokenExpirationDays: ${JWT_REFRESH_TOKEN_DAYS:-7}
+      Authentication__Google__ClientId: ${GOOGLE_CLIENT_ID}
+      Authentication__Google__ClientSecret: ${GOOGLE_CLIENT_SECRET}
+      Cors__AllowedOrigins__0: ${FRONTEND_ORIGIN:-http://localhost:4200}
+      RabbitMQ__HostName: rabbitmq
+      RabbitMQ__Port: 5672
+      RabbitMQ__UserName: ${RABBITMQ_USER}
+      RabbitMQ__Password: ${RABBITMQ_PASSWORD}
+      RabbitMQ__VirtualHost: /
+      # Management HTTP API base URL for the API's queue-depth diagnostics
+      # endpoint (GET /api/messaging/queue-depths) — inside the compose
+      # network the broker is reachable by service name, not localhost.
+      RabbitMQ__ManagementUrl: http://rabbitmq:15672
+    ports:
+      - "5109:8080"
+    networks:
+      - racehub-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  racehub-client:
+    build:
+      context: ./frontend/racehub-client
+      dockerfile: Dockerfile
+    container_name: racehub-client
+    restart: unless-stopped
+    depends_on:
+      racehub-api:
+        condition: service_healthy
+    ports:
+      - "4200:80"
+    networks:
+      - racehub-network
+
+  racehub-rankingworker:
+    build:
+      context: ./backend
+      dockerfile: src/RaceHub.RankingWorker/Dockerfile
+    container_name: racehub-rankingworker
+    restart: unless-stopped
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      ConnectionStrings__DefaultConnection: "Server=sqlserver;Database=RaceHubDb;User Id=sa;Password=${SQL_SA_PASSWORD};TrustServerCertificate=True;"
+      RabbitMQ__HostName: rabbitmq
+      RabbitMQ__Port: 5672
+      RabbitMQ__UserName: ${RABBITMQ_USER}
+      RabbitMQ__Password: ${RABBITMQ_PASSWORD}
+      RabbitMQ__VirtualHost: /
+    networks:
+      - racehub-network
+
+  racehub-rewardworker:
+    build:
+      context: ./backend
+      dockerfile: src/RaceHub.RewardWorker/Dockerfile
+    container_name: racehub-rewardworker
+    restart: unless-stopped
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      ConnectionStrings__DefaultConnection: "Server=sqlserver;Database=RaceHubDb;User Id=sa;Password=${SQL_SA_PASSWORD};TrustServerCertificate=True;"
+      RabbitMQ__HostName: rabbitmq
+      RabbitMQ__Port: 5672
+      RabbitMQ__UserName: ${RABBITMQ_USER}
+      RabbitMQ__Password: ${RABBITMQ_PASSWORD}
+      RabbitMQ__VirtualHost: /
+    networks:
+      - racehub-network
+
+  racehub-statisticsworker:
+    build:
+      context: ./backend
+      dockerfile: src/RaceHub.StatisticsWorker/Dockerfile
+    container_name: racehub-statisticsworker
+    restart: unless-stopped
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      ConnectionStrings__DefaultConnection: "Server=sqlserver;Database=RaceHubDb;User Id=sa;Password=${SQL_SA_PASSWORD};TrustServerCertificate=True;"
+      RabbitMQ__HostName: rabbitmq
+      RabbitMQ__Port: 5672
+      RabbitMQ__UserName: ${RABBITMQ_USER}
+      RabbitMQ__Password: ${RABBITMQ_PASSWORD}
+      RabbitMQ__VirtualHost: /
+    networks:
+      - racehub-network
+
+  # Fourth consumer of race.finished — evaluates achievement unlocks.
+  # Added without touching ranking/reward/statistics above: the concrete
+  # payoff of the topic-exchange design (see AchievementsConsumer).
+  racehub-achievementsworker:
+    build:
+      context: ./backend
+      dockerfile: src/RaceHub.AchievementsWorker/Dockerfile
+    container_name: racehub-achievementsworker
+    restart: unless-stopped
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      ConnectionStrings__DefaultConnection: "Server=sqlserver;Database=RaceHubDb;User Id=sa;Password=${SQL_SA_PASSWORD};TrustServerCertificate=True;"
+      RabbitMQ__HostName: rabbitmq
+      RabbitMQ__Port: 5672
+      RabbitMQ__UserName: ${RABBITMQ_USER}
+      RabbitMQ__Password: ${RABBITMQ_PASSWORD}
+      RabbitMQ__VirtualHost: /
+    networks:
+      - racehub-network

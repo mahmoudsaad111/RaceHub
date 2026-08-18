@@ -1,0 +1,48 @@
+<div class="profile-head">
+  <div class="avatar profile-avatar">🏎️</div>
+  <div>
+    <div class="profile-name">{{ displayName() }}</div>
+    <div class="profile-level">Level {{ level() }}</div>
+    <div class="xp-bar"><i [style.width.%]="xpPercent()"></i></div>
+    <div class="xp-num">{{ xpCurrent() | number }} / {{ xpTotal() | number }} XP</div>
+    <div class="coins-num">{{ coins() | number }} coins</div>
+  </div>
+</div>
+
+<div class="stat-trio">
+  <div class="card stat-tile"><div class="stat-num">{{ wins() }}</div><div class="stat-lbl">Wins</div></div>
+  <div class="card stat-tile"><div class="stat-num">{{ races() }}</div><div class="stat-lbl">Races</div></div>
+  <div class="card stat-tile"><div class="stat-num">{{ bestTime() }}</div><div class="stat-lbl">Best Time</div></div>
+  <div class="card stat-tile"><div class="stat-num">{{ rating() | number }}</div><div class="stat-lbl">Rating</div></div>
+</div>
+
+<div class="card achievements-card">
+  <h3>ACHIEVEMENTS <span class="ach-count">{{ unlockedCount() }} / {{ achievements().length }}</span></h3>
+  <div class="ach-grid">
+    @for (achievement of achievements(); track achievement.key) {
+      <div class="ach-badge" [class.locked]="!achievement.unlocked">
+        <div class="ach-icon">{{ achievement.unlocked ? '🏆' : '🔒' }}</div>
+        <div class="ach-title">{{ achievement.title }}</div>
+        <div class="ach-desc">{{ achievement.description }}</div>
+      </div>
+    } @empty {
+      <div class="ach-desc">Achievements load here once you've raced.</div>
+    }
+  </div>
+</div>
+
+<div class="card recent-card">
+  <h3>RECENT RACES</h3>
+  @for (race of recentRaces(); track race.track + race.time) {
+    <div class="recent-row">
+      <span class="r-ic">{{ race.icon }}</span>
+      <span class="r-name">{{ race.track }}</span>
+      <span class="r-pos">{{ race.position }}</span>
+      <span class="r-time">{{ race.time }}</span>
+    </div>
+  } @empty {
+    <div class="recent-row">
+      <span class="r-name">No races yet — hit the lobby and jump into one!</span>
+    </div>
+  }
+</div>

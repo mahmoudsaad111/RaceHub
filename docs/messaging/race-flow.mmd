@@ -1,0 +1,61 @@
+sequenceDiagram
+    participant Client as Frontend
+    participant API as RaceHub.API
+    participant DB as SQL Server
+    participant MQ as RabbitMQ
+    participant RW as RankingWorker
+    participant REW as RewardWorker
+    participant SW as StatisticsWorker
+    participant AW as AchievementsWorker
+    participant Relay as Notification Relay
+    participant SignalR as SignalR
+
+    Client->>API: POST /api/races/{id}/finish
+    API->>DB: Update race status → Finished
+    API->>MQ: Publish RaceFinishedIntegrationEvent<br/>(routing key: race.finished)
+    API-->>Client: 200 OK (immediate response)
+
+    par Parallel Worker Processing
+        MQ->>RW: Deliver to ranking-queue
+        RW->>RW: Check idempotency (ProcessedMessage)
+        RW->>DB: Update PlayerStatistics ratings
+        RW->>MQ: ACK message
+        RW-->>MQ: Mark as processed
+
+        MQ->>REW: Deliver to reward-queue
+        REW->>REW: Check idempotency (ProcessedMessage)
+        REW->>DB: Award coins/XP via RewardCurve
+        REW->>DB: Detect level-up, create Notification
+        REW->>MQ: Publish reward.credited event
+        REW->>MQ: ACK message
+        REW-->>MQ: Mark as processed
+
+        MQ->>SW: Deliver to statistics-queue
+        SW->>SW: Check idempotency (ProcessedMessage)
+        SW->>DB: Insert RaceHistoryEntry for each finisher
+        SW->>MQ: ACK message
+        SW-->>MQ: Mark as processed
+
+        MQ->>AW: Deliver to achievements-queue
+        AW->>AW: Check idempotency (ProcessedMessage)
+        AW->>DB: Evaluate achievement criteria
+        AW->>DB: Unlock achievements, create Notifications
+        AW->>MQ: Publish achievement.unlocked event
+        AW->>MQ: ACK message
+        AW-->>MQ: Mark as processed
+    end
+
+    MQ->>Relay: Deliver reward.credited to reward-notify-queue
+    Relay->>Relay: Check idempotency (ProcessedMessage)
+    Relay->>SignalR: Push SignalR toast to connected clients
+    Relay->>MQ: ACK message
+    Relay-->>MQ: Mark as processed
+
+    MQ->>Relay: Deliver achievement.unlocked to achievement-notify-queue
+    Relay->>Relay: Check idempotency (ProcessedMessage)
+    Relay->>SignalR: Push SignalR toast to connected clients
+    Relay->>MQ: ACK message
+    Relay-->>MQ: Mark as processed
+
+    SignalR->>Client: Live reward toast notification
+    SignalR->>Client: Live achievement toast notification

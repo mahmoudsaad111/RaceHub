@@ -1,0 +1,29 @@
+<div class="panel-head">
+  <h2>My Garage</h2>
+  <span class="panel-sub" style="margin-bottom:0;">{{ ownedCount() }} cars owned</span>
+</div>
+<div class="panel-sub">Tap a car to equip it for your next race — buy new cars in the Shop</div>
+
+<div class="garage-layout">
+  <div class="car-grid">
+    @for (car of cars(); track car.id) {
+      <div class="card car-card" [class.equipped]="car.equipped" (click)="selectCar(car.id)">
+        <div class="car-swatch" [ngStyle]="carSwatchStyle(car.color)">{{ car.icon }}</div>
+        <div class="cname">{{ car.name }}</div>
+        <div class="car-meta">{{ car.price === 0 ? 'Starter' : 'Purchased' }}</div>
+        @if (car.equipped) {
+          <span class="pill pill-green">Equipped</span>
+        }
+      </div>
+    }
+  </div>
+</div>
+
+<div class="stat-block" style="max-width:340px;">
+  @for (stat of stats(); track stat.label) {
+    <div class="stat-line">
+      <div class="s-lbl">{{ stat.label }}</div>
+      <div class="stat-bar"><i [style.width.%]="stat.value"></i></div>
+    </div>
+  }
+</div>
