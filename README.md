@@ -402,7 +402,7 @@ Server=sqlserver;Database=RaceHubDb;User Id=sa;Password=${SQL_SA_PASSWORD};Trust
 
 ![Database ERD](docs/database/erd.png)
 
-![Schema Overview](docs/database/schema-overview.png)
+Additional database diagrams (`schema-overview.png`) are available in [`docs/database/`](docs/database/).
 
 ### Key Entities
 
@@ -431,13 +431,11 @@ Server=sqlserver;Database=RaceHubDb;User Id=sa;Password=${SQL_SA_PASSWORD};Trust
 
 ## 🔄 Message Queue Flow
 
-### Race Finished Flow
+### RabbitMQ Topology
 
-![Race Finished Flow](docs/messaging/race-flow.png)
+![RabbitMQ Topology](docs/messaging/topology.png)
 
-### Worker Error Handling
-
-![Worker Lifecycle](docs/messaging/worker-lifecycle.png)
+Additional messaging diagrams (`race-flow.png`, `worker-lifecycle.png`) are available in [`docs/messaging/`](docs/messaging/).
 
 ---
 
