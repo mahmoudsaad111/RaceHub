@@ -29,7 +29,6 @@ graph TB
     subgraph Data["Data Layer"]
         direction TB
         SQL[(SQL Server 2022<br/>RaceHubDb)]
-        Redis[(Redis<br/>Presence/Cache)]
     end
 
     subgraph Infra["Infrastructure"]
@@ -44,7 +43,6 @@ graph TB
     Controllers -->|"Publish"| Outbox
     Hosted -->|"Relay"| SignalR
     Controllers --> SQL
-    SignalR --> Redis
     Ranking --> SQL
     Reward --> SQL
     Statistics --> SQL
@@ -70,5 +68,5 @@ graph TB
     class Controllers,SignalR,Hosted api
     class Ranking,Reward,Statistics,Achievements worker
     class Exchange,Relay messaging
-    class SQL,Redis data
+    class SQL data
     class RabbitMQ infra

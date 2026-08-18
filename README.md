@@ -33,10 +33,6 @@ RaceHub is a real-time multiplayer racing game where players create race rooms, 
 
 ![High-Level Architecture](docs/architecture/architecture.png)
 
-### Clean Architecture Layers
-
-![Clean Architecture Layers](docs/architecture/clean-architecture.png)
-
 ### Deployment Topology
 
 ![Deployment Topology](docs/architecture/deployment.png)
@@ -277,7 +273,7 @@ Server=sqlserver;Database=RaceHubDb;User Id=sa;Password=${SQL_SA_PASSWORD};Trust
 
 ### RabbitMQ Topology
 
-![RabbitMQ Topology](docs/messaging/topology.png)
+RabbitMQ topology diagrams are available in [`docs/messaging/`](docs/messaging/).
 
 ---
 
@@ -404,38 +400,57 @@ Server=sqlserver;Database=RaceHubDb;User Id=sa;Password=${SQL_SA_PASSWORD};Trust
 
 Additional database diagrams (`schema-overview.png`) are available in [`docs/database/`](docs/database/).
 
-### Key Entities
+### Entities by Domain
 
-| Entity | Description |
-|--------|-------------|
-| `User` | Extends IdentityUser; coins, XP, reward methods |
-| `Race` | Race lifecycle (Waiting → Starting → Running → Finished) |
-| `RacePlayer` | Player in a race with status tracking |
-| `RaceResult` | Final race results (position, time, points) |
-| `Lap` | Individual lap times with checkpoints |
-| `Track` | Procedurally generated tracks with checkpoint geometry |
-| `Car` | Vehicle catalog with stats (speed, acceleration, handling, braking, nitro) |
-| `UserCar` | User's owned vehicles |
-| `PlayerStatistics` | Elo-like rating, wins, races played |
-| `RaceHistoryEntry` | Historical race records |
-| `Achievement` | Achievement catalog (first_race, races_10, races_50, first_win, wins_10, podium_streak_3) |
-| `UserAchievement` | User's unlocked achievements |
-| `Notification` | In-app notifications for rewards/achievements |
-| `Friendship` | Friend relationships with status |
-| `ChatMessage` | Lobby chat history |
-| `RefreshToken` | JWT refresh token storage |
-| `OutboxMessage` | Reliable event publishing |
-| `ProcessedMessage` | Idempotency tracking for workers |
+#### Racing
+
+| Entity | Description | Key Fields |
+|--------|-------------|------------|
+| `Race` | Race lifecycle | `HostId`, `TrackId`, `Status`, `MaxPlayers`, `Laps` |
+| `RacePlayer` | Player in a race | `UserId`, `RaceId`, `CarId`, `Status`, `Position` |
+| `RaceResult` | Final race results | `RacePlayerId`, `Position`, `TotalTime`, `RatingChange` |
+| `Lap` | Individual lap times | `RacePlayerId`, `LapNumber`, `Time` |
+| `Track` | Procedurally generated tracks | `Name`, `Difficulty`, `Length`, `Environment`, `CheckpointGeometry` |
+| `TrackCheckpoint` | Track geometry points | `TrackId`, `Order`, `X`, `Y`, `Z` |
+
+#### Economy
+
+| Entity | Description | Key Fields |
+|--------|-------------|------------|
+| `Car` | Vehicle catalog | `Name`, `TopSpeed`, `Acceleration`, `Handling`, `Braking`, `NitroCapacity`, `Price` |
+| `UserCar` | User's owned vehicles | `UserId`, `CarId`, `PurchasedAt` |
+
+#### Progression
+
+| Entity | Description | Key Fields |
+|--------|-------------|------------|
+| `PlayerStatistics` | User rating and stats | `UserId`, `Rating`, `RacesPlayed`, `Wins`, `Podiums`, `BestTime` |
+| `RaceHistoryEntry` | Historical race records | `UserId`, `RaceId`, `Position`, `TotalTime`, `CoinsEarned`, `XpEarned` |
+| `Achievement` | Achievement catalog | `Name`, `Description`, `IconUrl`, `XpReward`, `CoinReward`, `Criteria` |
+| `UserAchievement` | User's unlocked achievements | `UserId`, `AchievementId`, `UnlockedAt` |
+| `Notification` | In-app notifications | `UserId`, `Type`, `Title`, `Message`, `IsRead` |
+
+#### Social
+
+| Entity | Description | Key Fields |
+|--------|-------------|------------|
+| `Friendship` | Friend relationships | `UserId`, `FriendId`, `Status` |
+| `ChatMessage` | Lobby chat history | `RaceId`, `UserId`, `Message`, `SentAt` |
+
+#### Auth & Messaging
+
+| Entity | Description | Key Fields |
+|--------|-------------|------------|
+| `User` | Extends IdentityUser | `Coins`, `ExperiencePoints`, `Level` |
+| `RefreshToken` | JWT refresh tokens | `UserId`, `Token`, `ExpiresAt` |
+| `OutboxMessage` | Reliable event publishing | `Type`, `Payload`, `CreatedAt`, `PublishedAt` |
+| `ProcessedMessage` | Idempotency tracking | `MessageId`, `QueueName`, `ProcessedAt` |
 
 ---
 
 ## 🔄 Message Queue Flow
 
-### RabbitMQ Topology
-
-![RabbitMQ Topology](docs/messaging/topology.png)
-
-Additional messaging diagrams (`race-flow.png`, `worker-lifecycle.png`) are available in [`docs/messaging/`](docs/messaging/).
+RabbitMQ topology and flow diagrams (`topology.png`, `race-flow.png`, `worker-lifecycle.png`) are available in [`docs/messaging/`](docs/messaging/).
 
 ---
 

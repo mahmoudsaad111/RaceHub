@@ -5,7 +5,6 @@ graph BT
         Rabbit[RabbitMQ.Client]
         Identity[ASP.NET Identity]
         SignalR[SignalR]
-        RedisClient[StackExchange.Redis]
         Fluent[FluentValidation]
         MediatR[MediatR]
     end
@@ -15,7 +14,7 @@ graph BT
         Persistence[Repositories / DbContext]
         Messaging[RabbitMQ Topology / Consumers]
         Auth[JWT / Google Auth Handlers]
-        Realtime[SignalR Presence / Redis]
+        Realtime[SignalR Presence]
         UnitOfWork[Unit of Work]
     end
 
@@ -53,7 +52,6 @@ graph BT
     Rabbit --> Messaging
     Identity --> Auth
     SignalR --> Realtime
-    RedisClient --> Realtime
     Fluent --> Validators
     MediatR --> CQRS
 
@@ -82,7 +80,7 @@ graph BT
     classDef domain fill:#f39c12,color:#fff,stroke:#333,stroke-width:1px
     classDef api fill:#9b59b6,color:#fff,stroke:#333,stroke-width:1px
 
-    class EF,Rabbit,Identity,SignalR,RedisClient,Fluent,MediatR external
+    class EF,Rabbit,Identity,SignalR,Fluent,MediatR external
     class Persistence,Messaging,Auth,Realtime,UnitOfWork infra
     class CQRS,Validators,DTOs,Interfaces,Behaviors app
     class Entities,Events,Enums,Aggregates domain
