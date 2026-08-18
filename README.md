@@ -170,21 +170,21 @@ See [`docs/images/`](docs/images/) for application screenshots.
 
 ## 📸 Screenshots
 
-![Screenshot](docs/images/Screenshot 2026-08-18 171407.png)
+![Screenshot](docs/images/Screenshot%202026-08-18%20171407.png)
 
-![Screenshot](docs/images/Screenshot 2026-08-18 171437.png)
+![Screenshot](docs/images/Screenshot%202026-08-18%20171437.png)
 
-![Screenshot](docs/images/Screenshot 2026-08-18 171457.png)
+![Screenshot](docs/images/Screenshot%202026-08-18%20171457.png)
 
-![Screenshot](docs/images/Screenshot 2026-08-18 171513.png)
+![Screenshot](docs/images/Screenshot%202026-08-18%20171513.png)
 
-![Screenshot](docs/images/Screenshot 2026-08-18 171525.png)
+![Screenshot](docs/images/Screenshot%202026-08-18%20171525.png)
 
-![Screenshot](docs/images/Screenshot 2026-08-18 171542.png)
+![Screenshot](docs/images/Screenshot%202026-08-18%20171542.png)
 
-![Screenshot](docs/images/Screenshot 2026-08-18 171602.png)
+![Screenshot](docs/images/Screenshot%202026-08-18%20171602.png)
 
-![Screenshot](docs/images/Screenshot 2026-08-18 171618.png)
+![Screenshot](docs/images/Screenshot%202026-08-18%20171618.png)
 
 ---
 
